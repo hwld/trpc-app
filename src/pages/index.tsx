@@ -1,13 +1,20 @@
+import { Button, Center } from "@mantine/core";
+import { showNotification } from "@mantine/notifications";
 import { trpc } from "../client/trpc";
 
 export default function Home() {
   const hello = trpc.hello.useQuery({ text: "client" });
-  if (!hello.data) {
-    return <div>Loading...</div>;
-  }
+
+  const handleClickShow = () => {
+    showNotification({
+      title: "サーバーからのメッセージ",
+      message: hello.data?.greeting ?? "loading...",
+    });
+  };
+
   return (
-    <div>
-      <p>{hello.data.greeting}</p>
-    </div>
+    <Center sx={{ minHeight: "100vh", minWidth: "100vh" }}>
+      <Button onClick={handleClickShow}>Show</Button>
+    </Center>
   );
 }
