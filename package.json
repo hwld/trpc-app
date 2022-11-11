@@ -22,7 +22,7 @@
     "@trpc/next": "^10.0.0-proxy-beta.26",
     "@trpc/react-query": "^10.0.0-proxy-beta.26",
     "@trpc/server": "^10.0.0-proxy-beta.26",
-    "next": "^12.3.2",
+    "next": "^13.0.3",
     "next-auth": "^4.15.0",
     "prisma": "^4.5.0",
     "react": "18.2.0",
