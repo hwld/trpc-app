@@ -21,15 +21,16 @@ const isLoggedIn = middleware(async ({ ctx, next }) => {
 const requireLoggedInProcedure = procedure.use(isLoggedIn);
 
 export const appRouter = router({
-  users: router({
-    me: requireLoggedInProcedure
-      .input(z.object({ name: z.string() }))
-      .mutation(async ({ input, ctx }) => {
-        await prisma.user.update({
-          where: { id: ctx.userId },
-          data: { name: input.name },
-        });
-      }),
+  updateMe: requireLoggedInProcedure
+    .input(z.object({ name: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await prisma.user.update({
+        where: { id: ctx.userId },
+        data: { name: input.name },
+      });
+    }),
+  deleteMe: requireLoggedInProcedure.mutation(async ({ ctx }) => {
+    await prisma.user.delete({ where: { id: ctx.userId } });
   }),
 });
 

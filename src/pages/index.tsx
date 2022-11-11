@@ -1,4 +1,12 @@
-import { AppShell, Avatar, Button, Header, Navbar, Text } from "@mantine/core";
+import {
+  AppShell,
+  Avatar,
+  Button,
+  Header,
+  Navbar,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { GetServerSideProps } from "next";
 import { unstable_getServerSession } from "next-auth";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -32,13 +40,24 @@ export default function Home() {
               <>
                 <Avatar src={session.data.user?.image} size={100} radius={50} />
                 <Text>{session.data.user?.name}</Text>
-                <Button onClick={() => signOut()} color="red">
-                  ログアウト
-                </Button>
+                <Stack spacing="xs" m={10}>
+                  <Button onClick={() => signOut()} color="red">
+                    ログアウト
+                  </Button>
 
-                <Button component={Link} href="/users/me" mt={10}>
-                  プロフィールを編集する
-                </Button>
+                  <Button component={Link} href="/users/me">
+                    プロフィールを編集する
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    color="red"
+                    component={Link}
+                    href="/users/delete"
+                  >
+                    ユーザーを削除する
+                  </Button>
+                </Stack>
               </>
             )}
           </div>

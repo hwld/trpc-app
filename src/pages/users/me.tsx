@@ -18,7 +18,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 };
 
 const Me: NextPage = () => {
-  const mutation = trpc.users.me.useMutation({
+  const updateMe = trpc.updateMe.useMutation({
     onSuccess() {
       showNotification({
         color: "green",
@@ -38,7 +38,7 @@ const Me: NextPage = () => {
   const [name, setName] = useState(session.data?.user?.name || "");
 
   const handleUpdate = () => {
-    mutation.mutate({ name });
+    updateMe.mutate({ name });
   };
 
   return (
