@@ -6,6 +6,7 @@ import {
   Navbar,
   Stack,
   Text,
+  Title,
 } from "@mantine/core";
 import { GetServerSideProps } from "next";
 import { unstable_getServerSession } from "next-auth";
@@ -77,7 +78,7 @@ export default function Home() {
         </Header>
       }
     >
-      main
+      <Title color="gray.8">アプリ開発のお題</Title>
     </AppShell>
   );
 }
