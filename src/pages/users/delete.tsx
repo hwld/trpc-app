@@ -18,7 +18,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
 const DeleteMe: NextPage = () => {
   const router = useRouter();
-  const deleteMe = trpc.deleteMe.useMutation({
+  const deleteMe = trpc.me.delete.useMutation({
     onSuccess: () => {
       showNotification({
         color: "green",

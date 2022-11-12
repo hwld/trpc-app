@@ -18,7 +18,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 };
 
 const Me: NextPage = () => {
-  const updateMe = trpc.updateMe.useMutation({
+  const updateMe = trpc.me.update.useMutation({
     onSuccess() {
       showNotification({
         color: "green",
