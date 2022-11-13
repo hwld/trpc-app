@@ -1,20 +1,42 @@
+import { prisma } from "@/server/prisma";
 import {
   AppShell,
   Avatar,
+  Badge,
   Button,
+  Card,
+  Flex,
   Header,
   Navbar,
   Stack,
   Text,
   Title,
 } from "@mantine/core";
-import { GetServerSideProps } from "next";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { unstable_getServerSession } from "next-auth";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { authOption } from "./api/auth/[...nextauth]";
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const themes = (
+    await prisma.appTheme.findMany({
+      include: { appThemeTags: true, user: true },
+    })
+  ).map(
+    ({ id, title, description, createdAt, updatedAt, user, appThemeTags }) => ({
+      id,
+      title,
+      description,
+      user: { name: user.name, image: user.image },
+      createdAt: createdAt.toUTCString(),
+      updatedAt: updatedAt.toUTCString(),
+      appThemeTags: appThemeTags.map(({ id, name }) => ({ id, name })),
+    })
+  );
+
   return {
     props: {
       session: await unstable_getServerSession(
@@ -22,11 +44,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         context.res,
         authOption
       ),
+      themes,
     },
   };
 };
 
-export default function Home() {
+type A = InferGetServerSidePropsType<typeof getServerSideProps>;
+
+export default function Home({
+  themes,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
 
   return (
@@ -79,6 +106,31 @@ export default function Home() {
       }
     >
       <Title color="gray.8">アプリ開発のお題</Title>
+      <Button component={Link} href="/themes/create">
+        お題を投稿する
+      </Button>
+      <Stack mt={30}>
+        {themes.map((theme) => {
+          return (
+            <Card key={theme.id} p="md" radius="md" withBorder>
+              <Title order={3}>{theme.title}</Title>
+              <Flex align="center" gap={5}>
+                <Avatar mt={5} src={theme.user.image} radius="xl" size="md" />
+                <Text>{theme.user.name}</Text>
+              </Flex>
+              <Flex mt={8}>
+                {theme.appThemeTags.map((tag) => {
+                  return (
+                    <Badge key={tag.id} sx={{ textTransform: "none" }}>
+                      {tag.name}
+                    </Badge>
+                  );
+                })}
+              </Flex>
+            </Card>
+          );
+        })}
+      </Stack>
     </AppShell>
   );
 }
