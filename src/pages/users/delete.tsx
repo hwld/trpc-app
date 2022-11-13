@@ -1,6 +1,7 @@
 import { trpc } from "@/client/trpc";
 import { Button, Text } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
+import { useMutation } from "@tanstack/react-query";
 import { GetServerSideProps, NextPage } from "next";
 import { unstable_getServerSession } from "next-auth";
 import { useRouter } from "next/router";
@@ -18,7 +19,10 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
 const DeleteMe: NextPage = () => {
   const router = useRouter();
-  const deleteMe = trpc.me.delete.useMutation({
+  const deleteMe = useMutation({
+    mutationFn: () => {
+      return trpc.me.delete.mutate();
+    },
     onSuccess: () => {
       showNotification({
         color: "green",

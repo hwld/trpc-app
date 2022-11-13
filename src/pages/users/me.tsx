@@ -1,6 +1,7 @@
-import { trpc } from "@/client/trpc";
+import { RouterInput, trpc } from "@/client/trpc";
 import { Button, TextInput } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
+import { useMutation } from "@tanstack/react-query";
 import { GetServerSideProps, NextPage } from "next";
 import { unstable_getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
@@ -18,7 +19,10 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 };
 
 const Me: NextPage = () => {
-  const updateMe = trpc.me.update.useMutation({
+  const updateMe = useMutation({
+    mutationFn: (data: RouterInput["me"]["update"]) => {
+      return trpc.me.update.mutate(data);
+    },
     onSuccess() {
       showNotification({
         color: "green",
@@ -34,6 +38,7 @@ const Me: NextPage = () => {
       });
     },
   });
+
   const session = useSession();
   const [name, setName] = useState(session.data?.user?.name || "");
 

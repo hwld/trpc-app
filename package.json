@@ -23,8 +23,6 @@
     "@prisma/client": "^4.5.0",
     "@tanstack/react-query": "^4.13.4",
     "@trpc/client": "^10.0.0-proxy-beta.26",
-    "@trpc/next": "^10.0.0-proxy-beta.26",
-    "@trpc/react-query": "^10.0.0-proxy-beta.26",
     "@trpc/server": "^10.0.0-proxy-beta.26",
     "next": "^13.0.3",
     "next-auth": "^4.16.4",
