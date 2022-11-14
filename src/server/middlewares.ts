@@ -8,11 +8,11 @@ export const isLoggedIn = middleware(async ({ ctx, next }) => {
   }
 
   const user = await prisma.user.findFirst({
-    where: { id: ctx.session.userId },
+    where: { id: ctx.session.user.id },
   });
   if (!user) {
     throw new TRPCError({ code: "FORBIDDEN" });
   }
 
-  return next({ ctx: { user, userId: ctx.session.userId } });
+  return next({ ctx: { loggedInUser: user } });
 });

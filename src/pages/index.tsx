@@ -1,3 +1,4 @@
+import { RouterInput, trpc } from "@/client/trpc";
 import { prisma } from "@/server/prisma";
 import {
   AppShell,
@@ -12,10 +13,13 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import { showNotification } from "@mantine/notifications";
+import { useMutation } from "@tanstack/react-query";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { unstable_getServerSession } from "next-auth";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { authOption } from "./api/auth/[...nextauth]";
 
 export const getServerSideProps = async (
@@ -49,12 +53,31 @@ export const getServerSideProps = async (
   };
 };
 
-type A = InferGetServerSidePropsType<typeof getServerSideProps>;
-
 export default function Home({
   themes,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
+  const router = useRouter();
+
+  const deleteMutation = useMutation({
+    mutationFn: (data: RouterInput["themes"]["delete"]) => {
+      return trpc.themes.delete.mutate(data);
+    },
+    onSuccess: () => {
+      router.reload();
+    },
+    onError: () => {
+      showNotification({
+        color: "red",
+        title: "お題の削除",
+        message: "お題の削除に失敗しました。",
+      });
+    },
+  });
+
+  const handleDeleteMutation = (id: string) => {
+    deleteMutation.mutate({ themeId: id });
+  };
 
   return (
     <AppShell
@@ -127,6 +150,9 @@ export default function Home({
                   );
                 })}
               </Flex>
+              <Button mt={10} onClick={() => handleDeleteMutation(theme.id)}>
+                削除する
+              </Button>
             </Card>
           );
         })}

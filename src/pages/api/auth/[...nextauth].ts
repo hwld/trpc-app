@@ -13,7 +13,7 @@ export const authOption: NextAuthOptions = {
   ],
   callbacks: {
     session({ session, user }) {
-      session.userId = user.id;
+      session.user.id = user.id;
       return session;
     },
   },
