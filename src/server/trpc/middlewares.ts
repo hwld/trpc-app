@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
-import { prisma } from "./prisma";
-import { middleware } from "./trpc";
+import { prisma } from "../db/prisma";
+import { middleware } from "./idnex";
 
 export const isLoggedIn = middleware(async ({ ctx, next }) => {
   if (!ctx.session?.user) {

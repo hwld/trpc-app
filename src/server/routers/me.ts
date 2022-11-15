@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { prisma } from "../prisma";
-import { requireLoggedInProcedure } from "../procedures";
-import { router } from "../trpc";
+import { prisma } from "../db/prisma";
+import { router } from "../trpc/idnex";
+import { requireLoggedInProcedure } from "../trpc/procedures";
 
 export const meRoute = router({
   update: requireLoggedInProcedure

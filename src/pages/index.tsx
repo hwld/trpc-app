@@ -1,5 +1,6 @@
+import { Link } from "@/client/components/Link";
 import { RouterInput, trpc } from "@/client/trpc";
-import { prisma } from "@/server/prisma";
+import { prisma } from "@/server/db/prisma";
 import {
   AppShell,
   Avatar,
@@ -18,18 +19,16 @@ import { useMutation } from "@tanstack/react-query";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { unstable_getServerSession } from "next-auth";
 import { signIn, signOut, useSession } from "next-auth/react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { authOption } from "./api/auth/[...nextauth]";
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const themes = (
-    await prisma.appTheme.findMany({
-      include: { appThemeTags: true, user: true },
-    })
-  ).map(
+  const rawThemes = await prisma.appTheme.findMany({
+    include: { appThemeTags: true, user: true },
+  });
+  const themes = rawThemes.map(
     ({ id, title, description, createdAt, updatedAt, user, appThemeTags }) => ({
       id,
       title,
@@ -37,7 +36,7 @@ export const getServerSideProps = async (
       user: { name: user.name, image: user.image },
       createdAt: createdAt.toUTCString(),
       updatedAt: updatedAt.toUTCString(),
-      appThemeTags: appThemeTags.map(({ id, name }) => ({ id, name })),
+      tags: appThemeTags.map(({ id, name }) => ({ id, name })),
     })
   );
 
@@ -142,7 +141,7 @@ export default function Home({
                 <Text>{theme.user.name}</Text>
               </Flex>
               <Flex mt={8}>
-                {theme.appThemeTags.map((tag) => {
+                {theme.tags.map((tag) => {
                   return (
                     <Badge key={tag.id} sx={{ textTransform: "none" }}>
                       {tag.name}
@@ -150,9 +149,17 @@ export default function Home({
                   );
                 })}
               </Flex>
-              <Button mt={10} onClick={() => handleDeleteMutation(theme.id)}>
-                削除する
-              </Button>
+              <Flex gap={10} mt={10}>
+                <Button component={Link} href={`themes/${theme.id}`}>
+                  詳細
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleDeleteMutation(theme.id)}
+                >
+                  削除する
+                </Button>
+              </Flex>
             </Card>
           );
         })}

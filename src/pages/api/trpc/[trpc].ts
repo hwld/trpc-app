@@ -1,4 +1,4 @@
-import { createContext } from "@/server/contexts";
+import { createContext } from "@/server/trpc/contexts";
 import * as trpcNext from "@trpc/server/adapters/next";
 import { appRouter } from "../../../server/routers/_app";
 

@@ -1,6 +1,6 @@
 import { Textarea } from "@/client/components/Textarea";
 import { RouterInput, trpc } from "@/client/trpc";
-import { prisma } from "@/server/prisma";
+import { prisma } from "@/server/db/prisma";
 import { Button, MultiSelect, Stack, TextInput } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { AppThemeTag } from "@prisma/client";
