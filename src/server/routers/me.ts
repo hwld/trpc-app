@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { prisma } from "../db/prisma";
+import { prisma } from "../prisma";
 import { router } from "../trpc/idnex";
 import { requireLoggedInProcedure } from "../trpc/procedures";
 

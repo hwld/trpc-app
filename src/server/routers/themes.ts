@@ -1,10 +1,20 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { prisma } from "../db/prisma";
+import { findTheme } from "../finders/theme";
+import { prisma } from "../prisma";
 import { router } from "../trpc/idnex";
-import { requireLoggedInProcedure } from "../trpc/procedures";
+import { publicProcedure, requireLoggedInProcedure } from "../trpc/procedures";
 
 export const themesRoute = router({
+  get: publicProcedure
+    .input(z.object({ themeId: z.string().min(1) }))
+    .query(async ({ input }) => {
+      const theme = await findTheme(input.themeId);
+      if (!theme) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+      return theme;
+    }),
   create: requireLoggedInProcedure
     .input(
       z.object({

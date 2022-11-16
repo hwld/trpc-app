@@ -1,6 +1,6 @@
 import { Link } from "@/client/components/Link";
 import { RouterInput, trpc } from "@/client/trpc";
-import { prisma } from "@/server/db/prisma";
+import { prisma } from "@/server/prisma";
 import {
   AppShell,
   Avatar,
