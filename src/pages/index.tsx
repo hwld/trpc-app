@@ -1,169 +1,30 @@
-import { Link } from "@/client/components/Link";
-import { RouterInput, trpc } from "@/client/trpc";
-import { prisma } from "@/server/prisma";
-import {
-  AppShell,
-  Avatar,
-  Badge,
-  Button,
-  Card,
-  Flex,
-  Header,
-  Navbar,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
-import { showNotification } from "@mantine/notifications";
-import { useMutation } from "@tanstack/react-query";
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-import { unstable_getServerSession } from "next-auth";
-import { signIn, signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/router";
+import { HomePage } from "@/client/components/HomePage";
+import { GetServerSidePropsWithReactQuery } from "@/server/lib/nextUtils";
+import { appRouter } from "@/server/routers/_app";
+import { dehydrate, QueryClient } from "@tanstack/react-query";
+import { Session, unstable_getServerSession } from "next-auth";
 import { authOption } from "./api/auth/[...nextauth]";
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const rawThemes = await prisma.appTheme.findMany({
-    include: { appThemeTags: true, user: true },
-  });
-  const themes = rawThemes.map(
-    ({ id, title, description, createdAt, updatedAt, user, appThemeTags }) => ({
-      id,
-      title,
-      description,
-      user: { name: user.name, image: user.image },
-      createdAt: createdAt.toUTCString(),
-      updatedAt: updatedAt.toUTCString(),
-      tags: appThemeTags.map(({ id, name }) => ({ id, name })),
-    })
-  );
+export const getServerSideProps: GetServerSidePropsWithReactQuery<{
+  session: Session | null;
+}> = async ({ req, res }) => {
+  const session = await unstable_getServerSession(req, res, authOption);
+
+  const themes = await appRouter
+    .createCaller({ session: null })
+    .themes.getAll();
+
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery(["themes"], async () => themes);
 
   return {
     props: {
-      session: await unstable_getServerSession(
-        context.req,
-        context.res,
-        authOption
-      ),
-      themes,
+      dehydratedState: dehydrate(queryClient),
+      session,
     },
   };
 };
 
-export default function Home({
-  themes,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const session = useSession();
-  const router = useRouter();
-
-  const deleteMutation = useMutation({
-    mutationFn: (data: RouterInput["themes"]["delete"]) => {
-      return trpc.themes.delete.mutate(data);
-    },
-    onSuccess: () => {
-      router.reload();
-    },
-    onError: () => {
-      showNotification({
-        color: "red",
-        title: "お題の削除",
-        message: "お題の削除に失敗しました。",
-      });
-    },
-  });
-
-  const handleDeleteMutation = (id: string) => {
-    deleteMutation.mutate({ themeId: id });
-  };
-
-  return (
-    <AppShell
-      navbar={
-        <Navbar width={{ base: 300 }}>
-          <div>
-            {session.status === "unauthenticated" && (
-              <Button onClick={() => signIn("github")}>ログイン</Button>
-            )}
-            {session.status === "authenticated" && (
-              <>
-                <Avatar src={session.data.user?.image} size={100} radius={50} />
-                <Text>{session.data.user?.name}</Text>
-                <Stack spacing="xs" m={10}>
-                  <Button onClick={() => signOut()} color="red">
-                    ログアウト
-                  </Button>
-
-                  <Button component={Link} href="/users/me">
-                    プロフィールを編集する
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    color="red"
-                    component={Link}
-                    href="/users/delete"
-                  >
-                    ユーザーを削除する
-                  </Button>
-                </Stack>
-              </>
-            )}
-          </div>
-        </Navbar>
-      }
-      header={
-        <Header
-          height={60}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <Text fw={700} ml={20} size={32}>
-            tRPC-App
-          </Text>
-        </Header>
-      }
-    >
-      <Title color="gray.8">アプリ開発のお題</Title>
-      <Button component={Link} href="/themes/create">
-        お題を投稿する
-      </Button>
-      <Stack mt={30}>
-        {themes.map((theme) => {
-          return (
-            <Card key={theme.id} p="md" radius="md" withBorder>
-              <Title order={3}>{theme.title}</Title>
-              <Flex align="center" gap={5}>
-                <Avatar mt={5} src={theme.user.image} radius="xl" size="md" />
-                <Text>{theme.user.name}</Text>
-              </Flex>
-              <Flex mt={8}>
-                {theme.tags.map((tag) => {
-                  return (
-                    <Badge key={tag.id} sx={{ textTransform: "none" }}>
-                      {tag.name}
-                    </Badge>
-                  );
-                })}
-              </Flex>
-              <Flex gap={10} mt={10}>
-                <Button component={Link} href={`themes/${theme.id}`}>
-                  詳細
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleDeleteMutation(theme.id)}
-                >
-                  削除する
-                </Button>
-              </Flex>
-            </Card>
-          );
-        })}
-      </Stack>
-    </AppShell>
-  );
+export default function Home() {
+  return <HomePage />;
 }

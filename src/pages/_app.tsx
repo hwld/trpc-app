@@ -1,3 +1,4 @@
+import { AppLayout } from "@/client/components/AppLayout";
 import { MantineProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
 import { Noto_Sans_JP } from "@next/font/google";
@@ -7,8 +8,6 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { useState } from "react";
@@ -21,9 +20,19 @@ const noto = Noto_Sans_JP({
 function App({
   Component,
   pageProps,
-}: AppProps<{ session: Session; dehydratedState: DehydratedState }>) {
-  const { session, dehydratedState, ...props } = pageProps;
-  const [queryClient] = useState(() => new QueryClient());
+}: AppProps<{
+  dehydratedState: DehydratedState;
+}>) {
+  const { dehydratedState, ...props } = pageProps;
+
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { retry: false, refetchOnWindowFocus: false },
+        },
+      })
+  );
 
   return (
     <>
@@ -37,22 +46,22 @@ function App({
 
       <QueryClientProvider client={queryClient}>
         <Hydrate state={dehydratedState}>
-          <SessionProvider session={session}>
-            <MantineProvider
-              withNormalizeCSS
-              withGlobalStyles
-              theme={{
+          <MantineProvider
+            withNormalizeCSS
+            withGlobalStyles
+            theme={{
+              fontFamily: `${noto.style.fontFamily}, sans-serif;`,
+              headings: {
                 fontFamily: `${noto.style.fontFamily}, sans-serif;`,
-                headings: {
-                  fontFamily: `${noto.style.fontFamily}, sans-serif;`,
-                },
-              }}
-            >
-              <NotificationsProvider position="bottom-center">
+              },
+            }}
+          >
+            <NotificationsProvider position="bottom-center">
+              <AppLayout>
                 <Component {...props} />
-              </NotificationsProvider>
-            </MantineProvider>
-          </SessionProvider>
+              </AppLayout>
+            </NotificationsProvider>
+          </MantineProvider>
         </Hydrate>
       </QueryClientProvider>
     </>

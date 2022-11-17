@@ -1,11 +1,6 @@
-import { RouterInput, trpc } from "@/client/trpc";
-import { Button, TextInput } from "@mantine/core";
-import { showNotification } from "@mantine/notifications";
-import { useMutation } from "@tanstack/react-query";
+import { ProfileUpdatePage } from "@/client/components/ProfileUpdatePage";
 import { GetServerSideProps, NextPage } from "next";
 import { unstable_getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
-import { useState } from "react";
 import { authOption } from "../api/auth/[...nextauth]";
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
@@ -15,48 +10,10 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     return { redirect: { destination: "/", permanent: false } };
   }
 
-  return { props: { session } };
+  return { props: {} };
 };
 
 const Me: NextPage = () => {
-  const updateMe = useMutation({
-    mutationFn: (data: RouterInput["me"]["update"]) => {
-      return trpc.me.update.mutate(data);
-    },
-    onSuccess() {
-      showNotification({
-        color: "green",
-        title: "ユーザー更新",
-        message: "ユーザーを更新しました。",
-      });
-    },
-    onError() {
-      showNotification({
-        color: "red",
-        title: "ユーザー更新",
-        message: "ユーザーを更新できませんでした。",
-      });
-    },
-  });
-
-  const session = useSession();
-  const [name, setName] = useState(session.data?.user?.name || "");
-
-  const handleUpdate = () => {
-    updateMe.mutate({ name });
-  };
-
-  return (
-    <div>
-      <TextInput
-        label="名前"
-        value={name}
-        onChange={({ target: { value } }) => {
-          setName(value);
-        }}
-      />
-      <Button onClick={handleUpdate}>変更</Button>
-    </div>
-  );
+  return <ProfileUpdatePage />;
 };
 export default Me;

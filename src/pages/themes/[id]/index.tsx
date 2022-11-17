@@ -1,6 +1,6 @@
 import { trpc } from "@/client/trpc";
-import { findTheme } from "@/server/finders/theme";
 import { GetServerSidePropsWithReactQuery } from "@/server/lib/nextUtils";
+import { appRouter } from "@/server/routers/_app";
 import { Avatar, Badge, Box, Flex, Stack, Text, Title } from "@mantine/core";
 import { dehydrate, QueryClient, useQuery } from "@tanstack/react-query";
 import { InferGetServerSidePropsType, NextPage } from "next";
@@ -13,14 +13,14 @@ export const getServerSideProps: GetServerSidePropsWithReactQuery<{
     throw new Error("Bad Request");
   }
 
-  const theme = await findTheme(themeId);
-  if (!theme) {
-    throw new Error("Bad Request");
-  }
+  // tRPCのrouterを直接呼ぶ
+  const theme = appRouter
+    .createCaller({ session: null })
+    .themes.get({ themeId });
 
   // react-queryに初期データとしてセットする
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery(["theme", themeId], async () => {
+  await queryClient.prefetchQuery(["themes", themeId], async () => {
     return theme;
   });
 
@@ -32,29 +32,22 @@ export const getServerSideProps: GetServerSidePropsWithReactQuery<{
 type PageProps = InferGetServerSidePropsType<typeof getServerSideProps>;
 
 const ThemeDetail: NextPage<PageProps> = ({ themeId }) => {
-  const { data: theme } = useQuery({
-    queryKey: ["theme", themeId],
-    queryFn: () => {
-      return trpc.themes.get.query({ themeId });
-    },
+  const { data: theme } = useQuery(["themes", themeId], () => {
+    return trpc.themes.get.query({ themeId });
   });
-
-  if (!theme) {
-    return <Box>Error</Box>;
-  }
 
   return (
     <Box p={30}>
       <Stack>
         <Flex gap={10}>
-          <Avatar src={theme.user.image} size={60} radius="xl" />
+          <Avatar src={theme?.user.image} size={60} radius="xl" />
           <Text fw="bold" size={20}>
-            {theme.user.name}
+            {theme?.user.name}
           </Text>
         </Flex>
-        <Title>{theme.title}</Title>
+        <Title>{theme?.title}</Title>
         <Flex gap={5} mt={5}>
-          {theme.tags.map((tag) => {
+          {theme?.tags.map((tag) => {
             return (
               <Badge key={tag.id} sx={{ textTransform: "none" }}>
                 {tag.name}
@@ -62,7 +55,7 @@ const ThemeDetail: NextPage<PageProps> = ({ themeId }) => {
             );
           })}
         </Flex>
-        <Text sx={{ whiteSpace: "pre-wrap" }}>{theme.description}</Text>
+        <Text sx={{ whiteSpace: "pre-wrap" }}>{theme?.description}</Text>
       </Stack>
     </Box>
   );
