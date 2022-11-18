@@ -1,13 +1,15 @@
 import { HomePage } from "@/client/components/HomePage";
+import { sessionQueryKey } from "@/client/hooks/useSessionQuery";
 import { GetServerSidePropsWithReactQuery } from "@/server/lib/nextUtils";
 import { appRouter } from "@/server/routers/_app";
 import { dehydrate, QueryClient } from "@tanstack/react-query";
-import { Session, unstable_getServerSession } from "next-auth";
+import { unstable_getServerSession } from "next-auth";
 import { authOption } from "./api/auth/[...nextauth]";
 
-export const getServerSideProps: GetServerSidePropsWithReactQuery<{
-  session: Session | null;
-}> = async ({ req, res }) => {
+export const getServerSideProps: GetServerSidePropsWithReactQuery = async ({
+  req,
+  res,
+}) => {
   const session = await unstable_getServerSession(req, res, authOption);
 
   const themes = await appRouter
@@ -15,12 +17,12 @@ export const getServerSideProps: GetServerSidePropsWithReactQuery<{
     .themes.getAll();
 
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery(["themes"], async () => themes);
+  await queryClient.prefetchQuery(sessionQueryKey, () => session);
+  await queryClient.prefetchQuery(["themes"], () => themes);
 
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
-      session,
     },
   };
 };

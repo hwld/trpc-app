@@ -2,7 +2,7 @@ import { Button, TextInput } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useSessionQuery } from "../hooks/useSessionQuery";
+import { sessionQueryKey, useSessionQuery } from "../hooks/useSessionQuery";
 import { RouterInput, trpc } from "../trpc";
 
 export const ProfileUpdatePage: React.FC = () => {
@@ -18,7 +18,7 @@ export const ProfileUpdatePage: React.FC = () => {
         title: "ユーザー更新",
         message: "ユーザーを更新しました。",
       });
-      queryClient.invalidateQueries(["session"]);
+      queryClient.invalidateQueries(sessionQueryKey);
     },
     onError() {
       showNotification({

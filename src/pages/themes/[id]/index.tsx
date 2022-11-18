@@ -3,11 +3,12 @@ import { GetServerSidePropsWithReactQuery } from "@/server/lib/nextUtils";
 import { appRouter } from "@/server/routers/_app";
 import { Avatar, Badge, Box, Flex, Stack, Text, Title } from "@mantine/core";
 import { dehydrate, QueryClient, useQuery } from "@tanstack/react-query";
-import { InferGetServerSidePropsType, NextPage } from "next";
+import { NextPage } from "next";
+import { useRouter } from "next/router";
 
-export const getServerSideProps: GetServerSidePropsWithReactQuery<{
-  themeId: string;
-}> = async ({ query }) => {
+export const getServerSideProps: GetServerSidePropsWithReactQuery = async ({
+  query,
+}) => {
   const { id: themeId } = query;
   if (typeof themeId !== "string") {
     throw new Error("Bad Request");
@@ -25,13 +26,13 @@ export const getServerSideProps: GetServerSidePropsWithReactQuery<{
   });
 
   return {
-    props: { dehydratedState: dehydrate(queryClient), themeId: themeId },
+    props: { dehydratedState: dehydrate(queryClient) },
   };
 };
 
-type PageProps = InferGetServerSidePropsType<typeof getServerSideProps>;
-
-const ThemeDetail: NextPage<PageProps> = ({ themeId }) => {
+const ThemeDetail: NextPage = () => {
+  const router = useRouter();
+  const themeId = router.query.id as string;
   const { data: theme } = useQuery(["themes", themeId], () => {
     return trpc.themes.get.query({ themeId });
   });

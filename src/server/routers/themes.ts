@@ -96,4 +96,14 @@ export const themesRoute = router({
 
       await prisma.appTheme.delete({ where: { id: theme.id } });
     }),
+
+  getAllTags: publicProcedure.query(async () => {
+    const rawTags = await prisma.appThemeTag.findMany();
+    const tags = rawTags.map(({ id, name }) => ({
+      id,
+      name,
+    }));
+
+    return tags;
+  }),
 });
