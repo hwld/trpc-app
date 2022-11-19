@@ -1,10 +1,9 @@
-import { trpc } from "@/client/trpc";
+import { ThemeDetailPage } from "@/client/components/ThemeDetailPage";
+import { themeDetailQueryKey } from "@/client/hooks/useThemeDetailQuery";
 import { GetServerSidePropsWithReactQuery } from "@/server/lib/nextUtils";
 import { appRouter } from "@/server/routers/_app";
-import { Avatar, Badge, Box, Flex, Stack, Text, Title } from "@mantine/core";
-import { dehydrate, QueryClient, useQuery } from "@tanstack/react-query";
+import { dehydrate, QueryClient } from "@tanstack/react-query";
 import { NextPage } from "next";
-import { useRouter } from "next/router";
 
 export const getServerSideProps: GetServerSidePropsWithReactQuery = async ({
   query,
@@ -21,7 +20,7 @@ export const getServerSideProps: GetServerSidePropsWithReactQuery = async ({
 
   // react-queryに初期データとしてセットする
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery(["themes", themeId], async () => {
+  await queryClient.prefetchQuery(themeDetailQueryKey(themeId), async () => {
     return theme;
   });
 
@@ -31,34 +30,6 @@ export const getServerSideProps: GetServerSidePropsWithReactQuery = async ({
 };
 
 const ThemeDetail: NextPage = () => {
-  const router = useRouter();
-  const themeId = router.query.id as string;
-  const { data: theme } = useQuery(["themes", themeId], () => {
-    return trpc.themes.get.query({ themeId });
-  });
-
-  return (
-    <Box p={30}>
-      <Stack>
-        <Flex gap={10}>
-          <Avatar src={theme?.user.image} size={60} radius="xl" />
-          <Text fw="bold" size={20}>
-            {theme?.user.name}
-          </Text>
-        </Flex>
-        <Title>{theme?.title}</Title>
-        <Flex gap={5} mt={5}>
-          {theme?.tags.map((tag) => {
-            return (
-              <Badge key={tag.id} sx={{ textTransform: "none" }}>
-                {tag.name}
-              </Badge>
-            );
-          })}
-        </Flex>
-        <Text sx={{ whiteSpace: "pre-wrap" }}>{theme?.description}</Text>
-      </Stack>
-    </Box>
-  );
+  return <ThemeDetailPage />;
 };
 export default ThemeDetail;

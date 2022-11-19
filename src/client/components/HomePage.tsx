@@ -4,20 +4,23 @@ import {
   Button,
   Card,
   Flex,
+  Pagination,
   Stack,
   Text,
   Title,
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useState } from "react";
+import { usePagingThemesQuery } from "../hooks/usePagingThemesQuery";
 import { RouterInput, trpc } from "../trpc";
 
 export const HomePage: React.FC = () => {
   const queryClient = useQueryClient();
-  const { data: themes } = useQuery(["themes"], () => {
-    return trpc.themes.getAll.query();
-  });
+
+  const [page, setPage] = useState(1);
+  const { pagingThemes } = usePagingThemesQuery({ page });
 
   const deleteMutation = useMutation({
     mutationFn: (data: RouterInput["themes"]["delete"]) => {
@@ -46,7 +49,7 @@ export const HomePage: React.FC = () => {
         お題を投稿する
       </Button>
       <Stack mt={30}>
-        {themes?.map((theme) => {
+        {pagingThemes?.themes.map((theme) => {
           return (
             <Card key={theme.id} p="md" radius="md" withBorder>
               <Title order={3}>{theme.title}</Title>
@@ -78,6 +81,11 @@ export const HomePage: React.FC = () => {
           );
         })}
       </Stack>
+      <Pagination
+        page={page}
+        onChange={setPage}
+        total={pagingThemes?.allPages ?? 0}
+      />
     </div>
   );
 };
