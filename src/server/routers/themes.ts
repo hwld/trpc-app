@@ -36,7 +36,7 @@ export const themesRoute = router({
   getMany: publicProcedure
     .input(z.object({ page: z.number().optional() }))
     .query(async ({ input: { page = 1 } }) => {
-      const limit = 1;
+      const limit = 2;
       const rawThemes = await prisma.appTheme.findMany({
         skip: (page - 1) * limit,
         take: limit,
@@ -72,10 +72,15 @@ export const themesRoute = router({
 
   get: publicProcedure
     .input(z.object({ themeId: z.string().min(1) }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const rawTheme = await prisma.appTheme.findUnique({
         where: { id: input.themeId },
-        include: { appThemeTags: true, user: true },
+        include: {
+          appThemeTags: true,
+          user: true,
+          likes: { where: { userId: ctx.session?.user.id } },
+          _count: { select: { likes: true } },
+        },
       });
       if (!rawTheme) {
         return undefined;
@@ -91,6 +96,8 @@ export const themesRoute = router({
           name: rawTheme.user.name,
           image: rawTheme.user.image,
         },
+        liked: rawTheme.likes.length == 1,
+        likeCounts: rawTheme._count.likes,
       };
 
       if (!theme) {
@@ -143,4 +150,40 @@ export const themesRoute = router({
 
     return tags;
   }),
+
+  like: requireLoggedInProcedure
+    .input(z.object({ themeId: z.string().min(1), like: z.boolean() }))
+    .mutation(async ({ input, ctx }) => {
+      const theme = await prisma.appTheme.findFirst({
+        where: { id: input.themeId },
+      });
+      if (!theme) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      // ログインユーザーがテーマの投稿者だったらエラー
+      if (theme.userId === ctx.loggedInUser.id) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
+      if (input.like) {
+        // いいねをつける
+        await prisma.appThemeLike.create({
+          data: {
+            appTheme: { connect: { id: input.themeId } },
+            user: { connect: { id: ctx.loggedInUser.id } },
+          },
+        });
+      } else {
+        // いいねを外す
+        await prisma.appThemeLike.delete({
+          where: {
+            appThemeId_userId: {
+              appThemeId: input.themeId,
+              userId: ctx.loggedInUser.id,
+            },
+          },
+        });
+      }
+    }),
 });
