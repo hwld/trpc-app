@@ -9,7 +9,7 @@ import {
   Title,
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 import {
@@ -25,12 +25,18 @@ export const ThemeDetailPage = () => {
   const queryClient = useQueryClient();
   const { theme } = useThemeDetailQuery(themeId);
 
+  const { data: liked } = useQuery(["themes", "page", themeId, "liked"], () => {
+    return trpc.themes.liked.query({ themeId });
+  });
+  console.log(liked);
+
   const likeMutation = useMutation({
     mutationFn: (data: RouterInput["themes"]["like"]) => {
       return trpc.themes.like.mutate(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(themeDetailQueryKey(themeId));
+      queryClient.invalidateQueries(["themes", "page", themeId, "liked"]);
     },
     onError: () => {
       showNotification({
@@ -42,7 +48,8 @@ export const ThemeDetailPage = () => {
   });
 
   const handleLike = () => {
-    likeMutation.mutate({ themeId, like: !theme?.liked });
+    console.log(liked);
+    likeMutation.mutate({ themeId, like: !liked });
   };
 
   return (
@@ -55,7 +62,7 @@ export const ThemeDetailPage = () => {
           </Text>
         </Flex>
         <Stack spacing="sm">
-          {theme?.liked ? (
+          {liked ? (
             <ActionIcon
               variant="outline"
               size={60}

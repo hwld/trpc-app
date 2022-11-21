@@ -1,79 +1,28 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { findTheme } from "../models/theme";
+import { findTheme, findThemes, themesWithPagingSchema } from "../models/theme";
 import { prisma } from "../prisma";
 import { router } from "../trpc/idnex";
 import { publicProcedure, requireLoggedInProcedure } from "../trpc/procedures";
 
 export const themesRoute = router({
-  getAll: publicProcedure.query(async () => {
-    const rawThemes = await prisma.appTheme.findMany({
-      include: { appThemeTags: true, user: true },
-    });
-
-    const themes = rawThemes.map(
-      ({
-        id,
-        title,
-        description,
-        createdAt,
-        updatedAt,
-        user,
-        appThemeTags,
-      }) => ({
-        id,
-        title,
-        description,
-        user: { name: user.name, image: user.image },
-        createdAt: createdAt.toUTCString(),
-        updatedAt: updatedAt.toUTCString(),
-        tags: appThemeTags.map(({ id, name }) => ({ id, name })),
-      })
-    );
-
-    return themes;
-  }),
-
   getMany: publicProcedure
     .input(z.object({ page: z.number().optional() }))
+    .output(themesWithPagingSchema)
     .query(async ({ input: { page = 1 } }) => {
-      const limit = 2;
-      const rawThemes = await prisma.appTheme.findMany({
+      const limit = 1;
+      const { themes, allPages } = await findThemes({
         skip: (page - 1) * limit,
         take: limit,
-        include: { appThemeTags: true, user: true },
         orderBy: { createdAt: "desc" },
       });
-
-      const themeCounts = await prisma.appTheme.count();
-      const allPages = Math.ceil(themeCounts / limit);
-
-      const themes = rawThemes.map(
-        ({
-          id,
-          title,
-          description,
-          createdAt,
-          updatedAt,
-          user,
-          appThemeTags,
-        }) => ({
-          id,
-          title,
-          description,
-          user: { name: user.name, image: user.image },
-          createdAt: createdAt.toUTCString(),
-          updatedAt: updatedAt.toUTCString(),
-          tags: appThemeTags.map(({ id, name }) => ({ id, name })),
-        })
-      );
 
       return { themes, allPages };
     }),
 
   get: publicProcedure
     .input(z.object({ themeId: z.string().min(1) }))
-    .query(async ({ input, ctx }) => {
+    .query(async ({ input }) => {
       const theme = await findTheme({ id: input.themeId });
 
       if (!theme) {
@@ -161,5 +110,19 @@ export const themesRoute = router({
           },
         });
       }
+    }),
+  liked: requireLoggedInProcedure
+    .input(z.object({ themeId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const liked = await prisma.appThemeLike.findUnique({
+        where: {
+          appThemeId_userId: {
+            appThemeId: input.themeId,
+            userId: ctx.loggedInUser.id,
+          },
+        },
+      });
+
+      return !(liked === null);
     }),
 });
