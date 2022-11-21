@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { findTheme } from "../models/theme";
 import { prisma } from "../prisma";
 import { router } from "../trpc/idnex";
 import { publicProcedure, requireLoggedInProcedure } from "../trpc/procedures";
@@ -73,32 +74,7 @@ export const themesRoute = router({
   get: publicProcedure
     .input(z.object({ themeId: z.string().min(1) }))
     .query(async ({ input, ctx }) => {
-      const rawTheme = await prisma.appTheme.findUnique({
-        where: { id: input.themeId },
-        include: {
-          appThemeTags: true,
-          user: true,
-          likes: { where: { userId: ctx.session?.user.id } },
-          _count: { select: { likes: true } },
-        },
-      });
-      if (!rawTheme) {
-        return undefined;
-      }
-
-      const theme = {
-        id: rawTheme.id,
-        title: rawTheme.title,
-        description: rawTheme.description,
-        tags: rawTheme.appThemeTags.map(({ id, name }) => ({ id, name })),
-        user: {
-          id: rawTheme.user.id,
-          name: rawTheme.user.name,
-          image: rawTheme.user.image,
-        },
-        liked: rawTheme.likes.length == 1,
-        likeCounts: rawTheme._count.likes,
-      };
+      const theme = await findTheme({ id: input.themeId });
 
       if (!theme) {
         throw new TRPCError({ code: "BAD_REQUEST" });
