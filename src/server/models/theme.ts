@@ -19,13 +19,13 @@ export const themeSchema = z.object({
 });
 type Theme = z.infer<typeof themeSchema>;
 
-const themeArgs = Prisma.validator<Prisma.AppThemeArgs>()({
+const themeArgs = {
   include: {
     appThemeTags: true,
     user: true,
     _count: { select: { likes: true } },
   },
-});
+} satisfies Prisma.AppThemeArgs;
 
 type RawTheme = Prisma.AppThemeGetPayload<typeof themeArgs>;
 
