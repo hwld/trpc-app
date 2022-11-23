@@ -3,7 +3,7 @@ import { z } from "zod";
 import { SortOrder } from "../lib/dbUtil";
 import { paginate } from "../lib/paginate";
 import { findTheme, findThemes, themesWithPagingSchema } from "../models/theme";
-import { prisma } from "../prisma";
+import { db } from "../prisma";
 import { router } from "../trpc/idnex";
 import { publicProcedure, requireLoggedInProcedure } from "../trpc/procedures";
 
@@ -16,7 +16,7 @@ export const themesRoute = router({
       const { data: themes, allPages } = await paginate({
         finder: findThemes,
         finderInput: { orderBy: { createdAt: SortOrder.desc } },
-        counter: prisma.appTheme.count,
+        counter: db.appTheme.count,
         pagingData: { page, limit },
       });
 
@@ -45,7 +45,7 @@ export const themesRoute = router({
     )
     .mutation(async ({ input, ctx }) => {
       // 指定されたタグが存在していなかった場合は、とりあえず500エラーを出す
-      await prisma.appTheme.create({
+      await db.appTheme.create({
         data: {
           title: input.title,
           description: input.description,
@@ -59,18 +59,18 @@ export const themesRoute = router({
     .input(z.object({ themeId: z.string().min(1) }))
     .mutation(async ({ input, ctx }) => {
       // 投稿者がログインユーザーである、指定されたidのお題が存在するか確認する。
-      const theme = await prisma.appTheme.findFirst({
+      const theme = await db.appTheme.findFirst({
         where: { id: input.themeId, userId: ctx.loggedInUser.id },
       });
       if (!theme) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
-      await prisma.appTheme.delete({ where: { id: theme.id } });
+      await db.appTheme.delete({ where: { id: theme.id } });
     }),
 
   getAllTags: publicProcedure.query(async () => {
-    const rawTags = await prisma.appThemeTag.findMany();
+    const rawTags = await db.appThemeTag.findMany();
     const tags = rawTags.map(({ id, name }) => ({
       id,
       name,
@@ -82,7 +82,7 @@ export const themesRoute = router({
   like: requireLoggedInProcedure
     .input(z.object({ themeId: z.string().min(1), like: z.boolean() }))
     .mutation(async ({ input, ctx }) => {
-      const theme = await prisma.appTheme.findFirst({
+      const theme = await db.appTheme.findFirst({
         where: { id: input.themeId },
       });
       if (!theme) {
@@ -96,7 +96,7 @@ export const themesRoute = router({
 
       if (input.like) {
         // いいねをつける
-        await prisma.appThemeLike.create({
+        await db.appThemeLike.create({
           data: {
             appTheme: { connect: { id: input.themeId } },
             user: { connect: { id: ctx.loggedInUser.id } },
@@ -104,7 +104,7 @@ export const themesRoute = router({
         });
       } else {
         // いいねを外す
-        await prisma.appThemeLike.delete({
+        await db.appThemeLike.delete({
           where: {
             appThemeId_userId: {
               appThemeId: input.themeId,
@@ -117,7 +117,7 @@ export const themesRoute = router({
   liked: requireLoggedInProcedure
     .input(z.object({ themeId: z.string() }))
     .query(async ({ input, ctx }) => {
-      const liked = await prisma.appThemeLike.findUnique({
+      const liked = await db.appThemeLike.findUnique({
         where: {
           appThemeId_userId: {
             appThemeId: input.themeId,

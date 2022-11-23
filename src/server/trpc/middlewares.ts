@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { prisma } from "../prisma";
+import { db } from "../prisma";
 import { middleware } from "./idnex";
 
 export const isLoggedIn = middleware(async ({ ctx, next }) => {
@@ -7,7 +7,7 @@ export const isLoggedIn = middleware(async ({ ctx, next }) => {
     throw new TRPCError({ code: "FORBIDDEN" });
   }
 
-  const user = await prisma.user.findFirst({
+  const user = await db.user.findFirst({
     where: { id: ctx.session.user.id },
   });
   if (!user) {

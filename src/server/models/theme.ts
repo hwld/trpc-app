@@ -1,7 +1,7 @@
 import { OmitStrict } from "@/share/types/OmitStrict";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { prisma } from "../prisma";
+import { db } from "../prisma";
 
 export const themeSchema = z.object({
   id: z.string(),
@@ -51,7 +51,7 @@ const convertTheme = (rawTheme: RawTheme): Theme => {
 export const findTheme = async (
   where: Prisma.AppThemeFindUniqueArgs["where"]
 ): Promise<Theme | undefined> => {
-  const rawTheme = await prisma.appTheme.findUnique({
+  const rawTheme = await db.appTheme.findUnique({
     where,
     ...themeArgs,
   });
@@ -72,7 +72,7 @@ export const themesWithPagingSchema = z.object({
 export const findThemes = async (
   args: OmitStrict<Prisma.AppThemeFindManyArgs, "include" | "select">
 ): Promise<Theme[]> => {
-  const rawThemes = await prisma.appTheme.findMany({
+  const rawThemes = await db.appTheme.findMany({
     ...args,
     ...themeArgs,
   });
