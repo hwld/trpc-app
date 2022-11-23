@@ -68,11 +68,10 @@ export const themesWithPagingSchema = z.object({
   themes: z.array(themeSchema),
   allPages: z.number(),
 });
-type ThemesWithPaging = z.infer<typeof themesWithPagingSchema>;
 
 export const findThemes = async (
   args: OmitStrict<Prisma.AppThemeFindManyArgs, "include" | "select">
-): Promise<ThemesWithPaging> => {
+): Promise<Theme[]> => {
   const rawThemes = await prisma.appTheme.findMany({
     ...args,
     ...themeArgs,
@@ -80,12 +79,5 @@ export const findThemes = async (
 
   const themes: Theme[] = rawThemes.map(convertTheme);
 
-  if (args.skip !== undefined && args.take !== undefined) {
-    const { skip, take, ...others } = args;
-    const counts = await prisma.appTheme.count({ ...others });
-    const allPages = Math.ceil(counts / args.take);
-    return { themes, allPages };
-  }
-
-  return { themes, allPages: 1 };
+  return themes;
 };

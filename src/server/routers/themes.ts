@@ -1,5 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { SortOrder } from "../lib/dbUtil";
+import { paginate } from "../lib/paginate";
 import { findTheme, findThemes, themesWithPagingSchema } from "../models/theme";
 import { prisma } from "../prisma";
 import { router } from "../trpc/idnex";
@@ -11,10 +13,11 @@ export const themesRoute = router({
     .output(themesWithPagingSchema)
     .query(async ({ input: { page = 1 } }) => {
       const limit = 1;
-      const { themes, allPages } = await findThemes({
-        skip: (page - 1) * limit,
-        take: limit,
-        orderBy: { createdAt: "desc" },
+      const { data: themes, allPages } = await paginate({
+        finder: findThemes,
+        finderInput: { orderBy: { createdAt: SortOrder.desc } },
+        counter: prisma.appTheme.count,
+        pagingData: { page, limit },
       });
 
       return { themes, allPages };
