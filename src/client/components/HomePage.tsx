@@ -48,6 +48,10 @@ export const HomePage: React.FC = () => {
       <Button component={Link} href="/themes/create">
         お題を投稿する
       </Button>
+      <Button ml="md" component={Link} href="/themes/search">
+        お題を検索する
+      </Button>
+
       <Stack mt={30}>
         {pagingThemes?.themes.map((theme) => {
           return (

@@ -12,7 +12,7 @@ export const themesRoute = router({
     .input(z.object({ page: z.number().optional() }))
     .output(themesWithPagingSchema)
     .query(async ({ input: { page = 1 } }) => {
-      const limit = 1;
+      const limit = 5;
       const { data: themes, allPages } = await paginate({
         finder: findThemes,
         finderInput: { orderBy: { createdAt: SortOrder.desc } },
@@ -33,6 +33,23 @@ export const themesRoute = router({
       }
 
       return theme;
+    }),
+
+  search: publicProcedure
+    .input(z.object({ keyword: z.string(), tagIds: z.array(z.string()) }))
+    .query(async ({ input }) => {
+      const themesContainsKeyword = await findThemes({
+        where: { title: { contains: input.keyword } },
+      });
+
+      // 一つのクエリで実行できないとページングが難しい。
+      const themes = themesContainsKeyword.filter((theme) => {
+        return input.tagIds.every((id) => {
+          return theme.tags.find((tag) => tag.id === id);
+        });
+      });
+
+      return themes;
     }),
 
   create: requireLoggedInProcedure
