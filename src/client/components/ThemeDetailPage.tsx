@@ -28,7 +28,6 @@ export const ThemeDetailPage = () => {
   const { data: liked } = useQuery(["themes", "page", themeId, "liked"], () => {
     return trpc.themes.liked.query({ themeId });
   });
-  console.log(liked);
 
   const likeMutation = useMutation({
     mutationFn: (data: RouterInput["themes"]["like"]) => {
@@ -48,7 +47,6 @@ export const ThemeDetailPage = () => {
   });
 
   const handleLike = () => {
-    console.log(liked);
     likeMutation.mutate({ themeId, like: !liked });
   };
 

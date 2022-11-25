@@ -10,6 +10,7 @@ import { authOption } from "./api/auth/[...nextauth]";
 export const getServerSideProps: GetServerSidePropsWithReactQuery = async ({
   req,
   res,
+  query,
 }) => {
   const session = await unstable_getServerSession(req, res, authOption);
 
