@@ -14,15 +14,13 @@ export const getServerSideProps: GetServerSidePropsWithReactQuery = async ({
   }
 
   // tRPCのrouterを直接呼ぶ
-  const theme = appRouter
+  const theme = await appRouter
     .createCaller({ session: null })
     .themes.get({ themeId });
 
   // react-queryに初期データとしてセットする
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery(themeDetailQueryKey(themeId), async () => {
-    return theme;
-  });
+  queryClient.setQueryData(themeDetailQueryKey(themeId), theme);
 
   return {
     props: { dehydratedState: dehydrate(queryClient) },

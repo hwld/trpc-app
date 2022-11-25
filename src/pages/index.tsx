@@ -1,6 +1,6 @@
 import { HomePage } from "@/client/components/HomePage";
-import { sessionQueryKey } from "@/client/hooks/useSessionQuery";
 import { pagingThemesQueryKey } from "@/client/hooks/usePagingThemesQuery";
+import { sessionQueryKey } from "@/client/hooks/useSessionQuery";
 import { GetServerSidePropsWithReactQuery } from "@/server/lib/nextUtils";
 import { appRouter } from "@/server/routers/_app";
 import { dehydrate, QueryClient } from "@tanstack/react-query";
@@ -20,11 +20,8 @@ export const getServerSideProps: GetServerSidePropsWithReactQuery = async ({
   const firstPageThemes = await caller.themes.getMany({ page: 1 });
 
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery(sessionQueryKey, () => session);
-  await queryClient.prefetchQuery(
-    pagingThemesQueryKey(1),
-    () => firstPageThemes
-  );
+  queryClient.setQueryData(sessionQueryKey, session);
+  queryClient.setQueryData(pagingThemesQueryKey(1), firstPageThemes);
 
   return {
     props: {

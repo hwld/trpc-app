@@ -17,7 +17,7 @@ export const getServerSideProps: GetServerSidePropsWithReactQuery = async ({
   }
 
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery(sessionQueryKey, () => session);
+  queryClient.setQueryData(sessionQueryKey, session);
   const dehydratedState = dehydrate(queryClient);
 
   return { props: { dehydratedState } };

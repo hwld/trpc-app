@@ -21,8 +21,8 @@ export const getServerSideProps: GetServerSidePropsWithReactQuery = async ({
   const allTags = await caller.themes.getAllTags();
 
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery(sessionQueryKey, () => session);
-  await queryClient.prefetchQuery(allTagsQueryKey, () => allTags);
+  queryClient.setQueryData(sessionQueryKey, session);
+  queryClient.setQueryData(allTagsQueryKey, allTags);
   const dehydratedState = dehydrate(queryClient);
 
   return {

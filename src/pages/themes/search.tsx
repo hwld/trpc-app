@@ -9,7 +9,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
   const allTags = await caller.themes.getAllTags();
 
   const queryClient = new QueryClient();
-  queryClient.prefetchQuery(allTagsQueryKey, () => allTags);
+  queryClient.setQueryData(allTagsQueryKey, allTags);
   const dehydratedState = dehydrate(queryClient);
 
   return {
