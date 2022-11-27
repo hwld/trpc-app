@@ -1,5 +1,6 @@
 import { ThemeSearchPage } from "@/client/components/ThemeSearchPage";
 import { allTagsQueryKey } from "@/client/hooks/useAllTagsQuery";
+import { searchedThemesQueryKey } from "@/client/hooks/useSearchedThemesQuery";
 import { sessionQueryKey } from "@/client/hooks/useSessionQuery";
 import { appRouter } from "@/server/routers/_app";
 import { dehydrate, QueryClient } from "@tanstack/react-query";
@@ -20,22 +21,14 @@ export const getServerSideProps: GetServerSideProps = async ({
   const keyword = query.keyword;
   const tagIds = query.tagIds;
 
-  const searchedThemes = await caller.themes.search({
-    keyword: typeof keyword === "string" ? keyword : "",
-    tagIds:
-      typeof tagIds === "string"
-        ? [tagIds]
-        : typeof tagIds === "object"
-        ? tagIds
-        : [],
-  });
+  const searchedThemes = await caller.themes.search({ keyword, tagIds });
 
   const queryClient = new QueryClient();
   queryClient.setQueryData(sessionQueryKey, session);
   queryClient.setQueryData(allTagsQueryKey, allTags);
   //query paramで指定されたワードの検索結果を入れておく
   queryClient.setQueryData(
-    ["search", keyword ?? "", tagIds ?? []],
+    searchedThemesQueryKey({ keyword, tagIds }),
     searchedThemes
   );
 

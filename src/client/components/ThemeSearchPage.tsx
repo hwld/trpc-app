@@ -10,11 +10,10 @@ import {
   Title,
   UnstyledButton,
 } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useAllTagsQuery } from "../hooks/useAllTagsQuery";
-import { trpc } from "../trpc";
+import { useSearchedThemesQuery } from "../hooks/useSearchedThemesQuery";
 import { Link } from "./Link";
 
 export const ThemeSearchPage: React.FC = () => {
@@ -34,13 +33,10 @@ export const ThemeSearchPage: React.FC = () => {
       : []
   );
 
-  const { data } = useQuery(
-    ["search", keyword, selectedTagIds],
-    () => {
-      return trpc.themes.search.query({ keyword, tagIds: selectedTagIds });
-    },
-    { keepPreviousData: true }
-  );
+  const { searchedThemes } = useSearchedThemesQuery({
+    keyword,
+    tagIds: selectedTagIds,
+  });
 
   const handleChangeKeyword: React.ChangeEventHandler<HTMLInputElement> = ({
     target: { value },
@@ -98,7 +94,7 @@ export const ThemeSearchPage: React.FC = () => {
         </Button>
       </Card>
       <Flex gap="md" wrap="wrap">
-        {data?.map((theme) => {
+        {searchedThemes?.map((theme) => {
           return (
             <UnstyledButton
               key={theme.id}

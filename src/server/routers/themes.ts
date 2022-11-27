@@ -36,7 +36,32 @@ export const themesRoute = router({
     }),
 
   search: publicProcedure
-    .input(z.object({ keyword: z.string(), tagIds: z.array(z.string()) }))
+    .input(
+      z.object({
+        keyword: z
+          .string()
+          .or(z.undefined())
+          .or(z.array(z.string()))
+          .transform((keyword) => {
+            return typeof keyword === "object"
+              ? keyword[0]
+              : typeof keyword === "string"
+              ? keyword
+              : "";
+          }),
+        tagIds: z
+          .array(z.string())
+          .or(z.string())
+          .or(z.undefined())
+          .transform((ids) => {
+            return typeof ids === "string"
+              ? [ids]
+              : typeof ids === "object"
+              ? ids
+              : [];
+          }),
+      })
+    )
     .query(async ({ input }) => {
       const themesContainsKeyword = await findThemes({
         where: { title: { contains: input.keyword } },
