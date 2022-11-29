@@ -2,7 +2,12 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { SortOrder } from "../lib/dbUtil";
 import { paginate } from "../lib/paginate";
-import { findTheme, findThemes, themesWithPagingSchema } from "../models/theme";
+import {
+  findTheme,
+  findThemes,
+  searchThemeIds,
+  themesWithPagingSchema,
+} from "../models/theme";
 import { db } from "../prisma";
 import { router } from "../trpc/idnex";
 import { publicProcedure, requireLoggedInProcedure } from "../trpc/procedures";
@@ -63,18 +68,29 @@ export const themesRoute = router({
       })
     )
     .query(async ({ input }) => {
-      const themesContainsKeyword = await findThemes({
-        where: { title: { contains: input.keyword } },
-      });
+      const searchedThemes = await db.$transaction(async (tx) => {
+        // 検索結果のお題のidを取得する
+        const searchedThemeIds = await searchThemeIds(
+          {
+            keyword: input.keyword,
+            tagIds: input.tagIds,
+          },
+          tx
+        );
 
-      // 一つのクエリで実行できないとページングが難しい。
-      const themes = themesContainsKeyword.filter((theme) => {
-        return input.tagIds.every((id) => {
-          return theme.tags.find((tag) => tag.id === id);
+        // idからお代を取得する
+        const { data: searchedThemes, allPages } = await paginate({
+          transactionClient: tx,
+          finder: findThemes,
+          finderInput: { where: { id: { in: searchedThemeIds } } },
+          counter: db.appTheme.count,
+          pagingData: { page: 1, limit: 100 },
         });
+
+        return searchedThemes;
       });
 
-      return themes;
+      return searchedThemes;
     }),
 
   create: requireLoggedInProcedure
@@ -92,7 +108,11 @@ export const themesRoute = router({
           title: input.title,
           description: input.description,
           userId: ctx.loggedInUser.id,
-          appThemeTags: { connect: input.tags.map((t) => ({ id: t })) },
+          appThemeTags: {
+            create: input.tags.map((tagId) => ({
+              tag: { connect: { id: tagId } },
+            })),
+          },
         },
       });
     }),

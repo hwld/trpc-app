@@ -19,9 +19,10 @@ export const themeSchema = z.object({
 });
 type Theme = z.infer<typeof themeSchema>;
 
+// パフォーマンスを考えるなら、APIごとにargsとschemaを作ったほうが良さそう
 const themeArgs = {
   include: {
-    appThemeTags: true,
+    appThemeTags: { include: { tag: true, theme: true } },
     user: true,
     _count: { select: { likes: true } },
   },
@@ -34,7 +35,7 @@ const convertTheme = (rawTheme: RawTheme): Theme => {
     id: rawTheme.id,
     title: rawTheme.title,
     description: rawTheme.description,
-    tags: rawTheme.appThemeTags.map(({ id, name }) => ({ id, name })),
+    tags: rawTheme.appThemeTags.map(({ tag: { id, name } }) => ({ id, name })),
     user: {
       id: rawTheme.user.id,
       name: rawTheme.user.name,
@@ -70,9 +71,12 @@ export const themesWithPagingSchema = z.object({
 });
 
 export const findThemes = async (
-  args: OmitStrict<Prisma.AppThemeFindManyArgs, "include" | "select">
+  args: OmitStrict<Prisma.AppThemeFindManyArgs, "include" | "select">,
+  transactionClient?: Prisma.TransactionClient
 ): Promise<Theme[]> => {
-  const rawThemes = await db.appTheme.findMany({
+  const client = transactionClient ?? db;
+
+  const rawThemes = await client.appTheme.findMany({
     ...args,
     ...themeArgs,
   });
@@ -80,4 +84,45 @@ export const findThemes = async (
   const themes: Theme[] = rawThemes.map(convertTheme);
 
   return themes;
+};
+
+export const searchThemeIds = async (
+  { keyword, tagIds }: { keyword: string; tagIds: string[] },
+  transactionClient?: Prisma.TransactionClient
+) => {
+  const client = transactionClient ?? db;
+
+  type SearchedThemeIds = { themeId: string }[];
+  const themeIds = await client.$queryRaw<SearchedThemeIds>`
+    SELECT
+      AppTheme.id as themeId
+    FROM
+      AppTheme
+      LEFT JOIN AppThemeTagOnAppTheme
+        ON(AppThemeTagOnAppTheme.themeId = AppTheme.id)
+    WHERE
+      ${
+        keyword
+          ? Prisma.sql`
+      AppTheme.title LIKE ${"%" + keyword + "%"}`
+          : "1 = 1"
+      }
+      ${
+        tagIds.length > 0
+          ? Prisma.sql`
+      AND tagId IN (${Prisma.join(tagIds)})`
+          : Prisma.empty
+      }
+    GROUP BY
+      AppTheme.id
+    ${
+      tagIds.length > 0
+        ? Prisma.sql`
+    HAVING
+      COUNT(themeId) = ${tagIds.length}`
+        : Prisma.empty
+    }
+  `;
+
+  return themeIds.map((t) => t.themeId);
 };

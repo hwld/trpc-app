@@ -85,6 +85,7 @@ export const ThemeSearchPage: React.FC = () => {
         />
         <MultiSelect
           data={allTags.map((tag) => ({ value: tag.id, label: tag.name }))}
+          searchable
           label="タグ"
           value={selectedTagIds}
           onChange={handleChangeTagIds}
