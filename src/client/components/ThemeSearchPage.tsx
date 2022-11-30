@@ -10,65 +10,41 @@ import {
   Title,
   UnstyledButton,
 } from "@mantine/core";
-import { useRouter } from "next/router";
-import { useState } from "react";
 import { useAllTagsQuery } from "../hooks/useAllTagsQuery";
 import { useSearchedThemesQuery } from "../hooks/useSearchedThemesQuery";
+import { useStateAndUrlParamString } from "../hooks/useStateAndUrlParamString";
+import { useStateAndUrlParamStringArray } from "../hooks/useStateAndUrlParamStringArray";
 import { Link } from "./Link";
 
 export const ThemeSearchPage: React.FC = () => {
-  const router = useRouter();
-
   const { allTags } = useAllTagsQuery();
 
-  const [keyword, setKeyword] = useState(
-    typeof router.query.keyword === "string" ? router.query.keyword : ""
-  );
+  const [keyword, setKeyword] = useStateAndUrlParamString({
+    paramName: "keyword",
+    initialData: "",
+  });
 
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
-    typeof router.query.tagIds === "string"
-      ? [router.query.tagIds]
-      : typeof router.query.tagIds === "object"
-      ? router.query.tagIds
-      : []
-  );
+  const [selectedTagIds, setSelectedTagIds] = useStateAndUrlParamStringArray({
+    paramName: "tagIds",
+    initialData: [],
+  });
 
   const { searchedThemes } = useSearchedThemesQuery({
     keyword,
     tagIds: selectedTagIds,
   });
 
-  const handleChangeKeyword: React.ChangeEventHandler<HTMLInputElement> = ({
+  const handleChangeKeyword = ({
     target: { value },
-  }) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("keyword", value);
-    if (value === "") {
-      url.searchParams.delete("keyword");
-    }
-    router.replace(url, undefined, {
-      shallow: true,
-    });
-
+  }: React.ChangeEvent<HTMLInputElement>) => {
     setKeyword(value);
   };
 
   const handleChangeTagIds = (ids: string[]) => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("tagIds");
-    ids.forEach((id) => {
-      url.searchParams.append("tagIds", id);
-    });
-    router.replace(url, undefined, { shallow: true });
-
     setSelectedTagIds(ids);
   };
 
   const handleClearCondition = () => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("keyword");
-    url.searchParams.delete("tagIds");
-    router.replace(url, undefined, { shallow: true });
     setKeyword("");
     setSelectedTagIds([]);
   };
