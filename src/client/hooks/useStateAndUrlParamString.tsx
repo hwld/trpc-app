@@ -20,9 +20,10 @@ export const useStateAndUrlParamString = ({
 
   const setStateAndQueryParams = (value: string) => {
     const url = new URL(window.location.href);
-    url.searchParams.set(paramName, value);
     if (value === "") {
       url.searchParams.delete(paramName);
+    } else {
+      url.searchParams.set(paramName, value);
     }
     router.replace(url, undefined, { shallow: true });
 
