@@ -56,7 +56,10 @@ export const ThemeDetailPage = () => {
   const { data: developers } = useQuery({
     queryKey: ["all-developers"],
     queryFn: () => {
-      return trpc.themes.getAllDevelopers.query();
+      if (!theme) {
+        return;
+      }
+      return trpc.themes.getAllDevelopers.query({ themeId: theme?.id });
     },
   });
 

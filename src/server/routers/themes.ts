@@ -191,17 +191,20 @@ export const themesRoute = router({
       return !(liked === null);
     }),
 
-  getAllDevelopers: publicProcedure.query(async () => {
-    const rawDeveloprs = await db.appThemeDeveloper.findMany({
-      include: { user: true },
-    });
-    const developers = rawDeveloprs.map(({ id, user: { name } }) => ({
-      id,
-      userName: name,
-    }));
+  getAllDevelopers: publicProcedure
+    .input(z.object({ themeId: z.string() }))
+    .query(async ({ input }) => {
+      const rawDeveloprs = await db.appThemeDeveloper.findMany({
+        where: { themeId: input.themeId },
+        include: { user: true },
+      });
+      const developers = rawDeveloprs.map(({ id, user: { name } }) => ({
+        id,
+        userName: name,
+      }));
 
-    return developers;
-  }),
+      return developers;
+    }),
 
   join: requireLoggedInProcedure
     .input(z.object({ themeId: z.string() }))
