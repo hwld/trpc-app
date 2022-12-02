@@ -3,6 +3,8 @@ import {
   Avatar,
   Badge,
   Box,
+  Button,
+  Card,
   Flex,
   Stack,
   Text,
@@ -50,6 +52,53 @@ export const ThemeDetailPage = () => {
     likeMutation.mutate({ themeId, like: !liked });
   };
 
+  //開発者を取得
+  const { data: developers } = useQuery({
+    queryKey: ["all-developers"],
+    queryFn: () => {
+      return trpc.themes.getAllDevelopers.query();
+    },
+  });
+
+  // 参加
+  const joinMutation = useMutation({
+    mutationFn: (data: RouterInput["themes"]["join"]) => {
+      return trpc.themes.join.mutate(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["all-developers"]);
+    },
+    onError: () => {
+      showNotification({ color: "red", message: "エラー" });
+    },
+  });
+
+  const handleJoin = () => {
+    if (!theme) {
+      return;
+    }
+    joinMutation.mutate({ themeId: theme.id });
+  };
+
+  const cancelJoinMutation = useMutation({
+    mutationFn: (data: RouterInput["themes"]["cancelJoin"]) => {
+      return trpc.themes.cancelJoin.mutate(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["all-developers"]);
+    },
+    onError: () => {
+      showNotification({ color: "red", message: "エラー" });
+    },
+  });
+
+  const handleCancelJoin = () => {
+    if (!theme) {
+      return;
+    }
+    cancelJoinMutation.mutate({ themeId: theme.id });
+  };
+
   return (
     <Box p={30}>
       <Stack>
@@ -94,6 +143,20 @@ export const ThemeDetailPage = () => {
           })}
         </Flex>
         <Text sx={{ whiteSpace: "pre-wrap" }}>{theme?.description}</Text>
+      </Stack>
+      <Button onClick={handleJoin}>参加する</Button>
+      <Text mt="lg">参加者</Text>
+      <Stack>
+        {developers?.map((d) => {
+          return (
+            <Card p="lg" withBorder key={d.id}>
+              <Flex justify="space-between">
+                <Text>{d.userName}</Text>
+                <Button onClick={handleCancelJoin}>キャンセル</Button>
+              </Flex>
+            </Card>
+          );
+        })}
       </Stack>
     </Box>
   );

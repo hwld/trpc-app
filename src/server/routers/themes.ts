@@ -190,4 +190,39 @@ export const themesRoute = router({
 
       return !(liked === null);
     }),
+
+  getAllDevelopers: publicProcedure.query(async () => {
+    const rawDeveloprs = await db.appThemeDeveloper.findMany({
+      include: { user: true },
+    });
+    const developers = rawDeveloprs.map(({ id, user: { name } }) => ({
+      id,
+      userName: name,
+    }));
+
+    return developers;
+  }),
+
+  join: requireLoggedInProcedure
+    .input(z.object({ themeId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await db.appThemeDeveloper.create({
+        data: {
+          theme: { connect: { id: input.themeId } },
+          user: { connect: { id: ctx.loggedInUser.id } },
+        },
+      });
+    }),
+  cancelJoin: requireLoggedInProcedure
+    .input(z.object({ themeId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await db.appThemeDeveloper.delete({
+        where: {
+          themeId_userId: {
+            themeId: input.themeId,
+            userId: ctx.loggedInUser.id,
+          },
+        },
+      });
+    }),
 });

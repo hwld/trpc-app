@@ -3,7 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -53,6 +52,7 @@ model User {
   sessions      Session[]
   themes        AppTheme[]
   themeLikes    AppThemeLike[]
+  developers AppThemeDeveloper[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -75,6 +75,7 @@ model AppTheme {
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   appThemeTags AppThemeTagOnAppTheme[]
   likes        AppThemeLike[]
+  developers AppThemeDeveloper[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 }
@@ -106,4 +107,17 @@ model AppThemeLike {
   createdAt DateTime @default(now())
 
   @@unique([appThemeId, userId])
+}
+
+
+model AppThemeDeveloper {
+  id String @id @default(cuid())
+  themeId String
+  theme AppTheme @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([themeId,userId])
 }
