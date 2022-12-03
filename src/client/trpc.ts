@@ -4,7 +4,11 @@ import { AppRouter } from "../server/routers/_app";
 
 // TODO
 function getBaseUrl() {
-  return "http://localhost:3000";
+  if (process.env.NODE_ENV === "production") {
+    return `https://${process.env.NEXT_PUBLIC_URL}`;
+  } else {
+    return "http://localhost:3000";
+  }
 }
 
 export const trpc = createTRPCProxyClient<AppRouter>({
