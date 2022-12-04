@@ -19,6 +19,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# ビルド時に必要になるNEXT_PUBLIC系の環境変数を外から受け取る
+ARG _NEXT_PUBLIC_URL
+ENV NEXT_PUBLIC_URL ${_NEXT_PUBLIC_URL}
 
 RUN npm run build
 
@@ -39,6 +42,5 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
-EXPOSE 3000
-ENV PORT 3000
+
 CMD ["node", "server.js"]

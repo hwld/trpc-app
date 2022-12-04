@@ -1,0 +1,29 @@
+steps:
+  # コンテナイメージをビルドする
+  - name: "gcr.io/cloud-builders/docker"
+    entrypoint: "bash"
+    args:
+      - -c
+      - |
+        docker build -t gcr.io/$PROJECT_ID/trpc-app --build-arg _NEXT_PUBLIC_URL=$_NEXT_PUBLIC_URL .
+  # コンテナイメージをcontainer registryにプッシュする
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/trpc-app"]
+  # コンテナイメージをCloud Runにデプロイする
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      [
+        "run",
+        "deploy",
+        "trpc-app",
+        "--image",
+        "gcr.io/$PROJECT_ID/trpc-app",
+        "--region",
+        "asia-northeast1",
+        "--platform",
+        "managed",
+        "--allow-unauthenticated",
+      ]
+images:
+  - gcr.io/$PROJECT_ID/trpc-app
