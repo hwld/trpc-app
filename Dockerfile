@@ -4,12 +4,7 @@ RUN apk add --no-cache libc6-compat sqlite
 WORKDIR /app
 COPY package.json package-lock.json prisma ./
 
-# テスト用にコンテナ内にsqliteを作る
-RUN sqlite3 db/dev.db && \
-    npx prisma migrate deploy
-
 RUN npm ci;
-RUN npx prisma generate
 
 
 # アプリをビルドするステージ
@@ -34,7 +29,6 @@ ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=deps --chown=nextjs:nodejs /app/db ./db
 
 COPY --from=builder /app/public ./public
 
@@ -42,5 +36,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
+
+RUN npx prisma generate
 
 CMD ["node", "server.js"]
