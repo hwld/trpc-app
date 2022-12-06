@@ -51,6 +51,9 @@ export const HomePage: React.FC = () => {
       <Button ml="md" component={Link} href="/themes/search">
         お題を検索する
       </Button>
+      <Button ml="md" component={Link} href="/createRepository">
+        リポジトリを作成する
+      </Button>
 
       <Stack mt={30}>
         {pagingThemes?.themes.map((theme) => {

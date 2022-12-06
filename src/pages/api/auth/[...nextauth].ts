@@ -9,6 +9,7 @@ export const authOption: NextAuthOptions = {
     GithubProvider({
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
+      authorization: { params: { scope: "read:user, public_repo" } },
     }),
   ],
   callbacks: {
