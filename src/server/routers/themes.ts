@@ -13,6 +13,9 @@ import { router } from "../trpc/idnex";
 import { publicProcedure, requireLoggedInProcedure } from "../trpc/procedures";
 
 export const themesRoute = router({
+  getRaw: publicProcedure.query(async () => {
+    return await db.appTheme.findMany({});
+  }),
   getMany: publicProcedure
     .input(z.object({ page: z.number().optional() }))
     .output(themesWithPagingSchema)

@@ -21,6 +21,7 @@ export const HomePage: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const { pagingThemes } = usePagingThemesQuery({ page });
+  console.log(pagingThemes);
 
   const deleteMutation = useMutation({
     mutationFn: (data: RouterInput["themes"]["delete"]) => {

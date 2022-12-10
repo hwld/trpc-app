@@ -1,9 +1,10 @@
 import { AppLayout } from "@/client/components/AppLayout";
+import { superjson } from "@/server/lib/superjson";
+import { QueryClientPageProps } from "@/server/lib/withQueryClientGetServerSideProps";
 import { MantineProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
 import { Noto_Sans_JP } from "@next/font/google";
 import {
-  DehydratedState,
   Hydrate,
   QueryClient,
   QueryClientProvider,
@@ -17,13 +18,8 @@ const noto = Noto_Sans_JP({
   subsets: ["japanese"],
 });
 
-function App({
-  Component,
-  pageProps,
-}: AppProps<{
-  dehydratedState: DehydratedState;
-}>) {
-  const { dehydratedState, ...props } = pageProps;
+function App({ Component, pageProps }: AppProps<QueryClientPageProps>) {
+  const { stringifiedDehydratedState, ...props } = pageProps;
 
   const [queryClient] = useState(
     () =>
@@ -45,7 +41,7 @@ function App({
       </Head>
 
       <QueryClientProvider client={queryClient}>
-        <Hydrate state={dehydratedState}>
+        <Hydrate state={superjson.parse(stringifiedDehydratedState || "{}")}>
           <MantineProvider
             withNormalizeCSS
             withGlobalStyles

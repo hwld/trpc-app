@@ -1,3 +1,4 @@
+import { superjson } from "@/server/lib/superjson";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { inferRouterInputs } from "@trpc/server";
 import { AppRouter } from "../server/routers/_app";
@@ -12,6 +13,7 @@ function getBaseUrl() {
 }
 
 export const trpc = createTRPCProxyClient<AppRouter>({
+  transformer: superjson,
   links: [httpBatchLink({ url: `${getBaseUrl()}/api/trpc` })],
 });
 
