@@ -11,10 +11,16 @@ export const AppLayout: React.FC<Props> = ({ children }) => {
   const { session } = useSessionQuery();
 
   return (
-    <Flex h="100vh" gap={40} p="md" bg="gray.2">
+    <Flex mih="100vh" gap={40} p="md" bg="gray.2">
       <SideMenu loggedInUser={session?.user} />
       <Box w="100%">
-        <Flex justify="flex-end">
+        <Flex
+          justify="flex-end"
+          pos="sticky"
+          top={16}
+          sx={{ zIndex: 2 }}
+          mb={16}
+        >
           {session ? (
             <UserCard loggedInUser={session?.user} />
           ) : (

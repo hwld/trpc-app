@@ -31,17 +31,28 @@ export const UserCard: React.FC<Props> = ({ loggedInUser }) => {
             radius="md"
             w="300px"
             p="sm"
-            withBorder
+            bg="red.7"
             sx={(theme) => ({
               flexShrink: 0,
-              boxShadow: theme.shadows.lg,
+              boxShadow: `2px 4px 6px ${theme.fn.rgba(
+                theme.colors.red[7],
+                0.3
+              )}`,
             })}
           >
             <Flex gap="sm">
               <Avatar size="md" radius="xl" src={loggedInUser?.image} />
-              <Stack spacing={0}>
-                <Text>{loggedInUser?.name}</Text>
-                <Flex gap="sm">
+              <Stack spacing={5} sx={{ flexGrow: 1 }}>
+                <Text color="gray.1">{loggedInUser?.name}</Text>
+                <Flex
+                  gap="xs"
+                  bg="gray.1"
+                  px={10}
+                  py={3}
+                  sx={(theme) => ({
+                    borderRadius: "5px",
+                  })}
+                >
                   <Flex align="center">
                     <MdFavorite color={mantineTheme.colors.red[7]} />
                     <Text color="red.7" size="xs">

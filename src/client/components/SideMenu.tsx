@@ -11,14 +11,17 @@ import { SideMenuLink } from "./SideMenuAction";
 type Props = { loggedInUser: Session["user"] | undefined };
 export const SideMenu: React.FC<Props> = ({ loggedInUser }) => {
   const router = useRouter();
-  console.log(router.pathname);
+
   return (
     <Flex
       direction="column"
       w="60px"
-      h="100%"
       bg="red.7"
+      pos="sticky"
+      top={16}
+      h="calc(100vh - 32px)"
       sx={(theme) => ({
+        zIndex: 2,
         borderRadius: "10px",
         boxShadow: `1px 5px 10px ${theme.fn.rgba(theme.colors.red[7], 0.5)}`,
       })}
