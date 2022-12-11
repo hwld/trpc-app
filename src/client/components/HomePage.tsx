@@ -21,7 +21,6 @@ export const HomePage: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const { pagingThemes } = usePagingThemesQuery({ page });
-  console.log(pagingThemes);
 
   const deleteMutation = useMutation({
     mutationFn: (data: RouterInput["themes"]["delete"]) => {
@@ -45,7 +44,9 @@ export const HomePage: React.FC = () => {
 
   return (
     <div>
-      <Title color="gray.8">アプリ開発のお題</Title>
+      <Title order={3} color="gray.8">
+        アプリ開発のお題
+      </Title>
       <Button component={Link} href="/themes/create">
         お題を投稿する
       </Button>

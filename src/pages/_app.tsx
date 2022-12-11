@@ -1,4 +1,5 @@
 import { AppLayout } from "@/client/components/AppLayout";
+import { theme } from "@/client/styles/theme";
 import { superjson } from "@/server/lib/superjson";
 import { QueryClientPageProps } from "@/server/lib/withQueryClientGetServerSideProps";
 import { MantineProvider } from "@mantine/core";
@@ -13,7 +14,7 @@ import type { AppProps } from "next/app";
 import Head from "next/head";
 import { useState } from "react";
 
-const noto = Noto_Sans_JP({
+export const noto = Noto_Sans_JP({
   weight: "500",
   subsets: ["japanese"],
 });
@@ -42,16 +43,7 @@ function App({ Component, pageProps }: AppProps<QueryClientPageProps>) {
 
       <QueryClientProvider client={queryClient}>
         <Hydrate state={superjson.parse(stringifiedDehydratedState || "{}")}>
-          <MantineProvider
-            withNormalizeCSS
-            withGlobalStyles
-            theme={{
-              fontFamily: `${noto.style.fontFamily}, sans-serif;`,
-              headings: {
-                fontFamily: `${noto.style.fontFamily}, sans-serif;`,
-              },
-            }}
-          >
+          <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
             <NotificationsProvider position="bottom-center">
               <AppLayout>
                 <Component {...props} />

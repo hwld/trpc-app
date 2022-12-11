@@ -20,7 +20,7 @@ export const themesRoute = router({
     .input(z.object({ page: z.number().optional() }))
     .output(themesWithPagingSchema)
     .query(async ({ input: { page = 1 } }) => {
-      const limit = 5;
+      const limit = 1;
       const { data: themes, allPages } = await paginate({
         finder: findThemes,
         finderInput: { orderBy: { createdAt: SortOrder.desc } },
