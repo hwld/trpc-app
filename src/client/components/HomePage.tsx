@@ -12,12 +12,16 @@ import {
 import { showNotification } from "@mantine/notifications";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useState } from "react";
+import React, { SyntheticEvent, useState } from "react";
+import { useLoginModal } from "../contexts/useLoginModalContext";
 import { usePagingThemesQuery } from "../hooks/usePagingThemesQuery";
+import { useSessionQuery } from "../hooks/useSessionQuery";
 import { RouterInput, trpc } from "../trpc";
 
 export const HomePage: React.FC = () => {
   const queryClient = useQueryClient();
+  const { session } = useSessionQuery();
+  const { openLoginModal } = useLoginModal();
 
   const [page, setPage] = useState(1);
   const { pagingThemes } = usePagingThemesQuery({ page });
@@ -42,12 +46,23 @@ export const HomePage: React.FC = () => {
     deleteMutation.mutate({ themeId: id });
   };
 
+  const handleClickGoThemeCreate = (e: SyntheticEvent) => {
+    if (!session) {
+      e.preventDefault();
+      openLoginModal();
+    }
+  };
+
   return (
     <div>
       <Title order={3} color="gray.8">
         アプリ開発のお題
       </Title>
-      <Button component={Link} href="/themes/create">
+      <Button
+        component={Link}
+        href="/themes/create"
+        onClick={handleClickGoThemeCreate}
+      >
         お題を投稿する
       </Button>
       <Button ml="md" component={Link} href="/themes/search">

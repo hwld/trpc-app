@@ -1,4 +1,5 @@
 import { AppLayout } from "@/client/components/AppLayout";
+import { LoginModalContextProvider } from "@/client/contexts/useLoginModalContext";
 import { theme } from "@/client/styles/theme";
 import { superjson } from "@/server/lib/superjson";
 import { QueryClientPageProps } from "@/server/lib/withQueryClientGetServerSideProps";
@@ -45,9 +46,11 @@ function App({ Component, pageProps }: AppProps<QueryClientPageProps>) {
         <Hydrate state={superjson.parse(stringifiedDehydratedState || "{}")}>
           <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
             <NotificationsProvider position="bottom-center">
-              <AppLayout>
-                <Component {...props} />
-              </AppLayout>
+              <LoginModalContextProvider>
+                <AppLayout>
+                  <Component {...props} />
+                </AppLayout>
+              </LoginModalContextProvider>
             </NotificationsProvider>
           </MantineProvider>
         </Hydrate>
