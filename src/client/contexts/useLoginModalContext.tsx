@@ -1,9 +1,15 @@
+import { OmitStrict } from "@/share/types/OmitStrict";
 import { createContext, useContext, useState } from "react";
 
-type LoginModalContext = {
+type LoginModalState = {
   isLoginModalOpen: boolean;
+  callbackUrlAfterLogin?: string;
+};
+type LoginModalContext = LoginModalState & {
   closeLoginModal: () => void;
-  openLoginModal: () => void;
+  openLoginModal: (
+    options?: OmitStrict<LoginModalState, "isLoginModalOpen">
+  ) => void;
 };
 const loginModalContext = createContext<LoginModalContext | undefined>(
   undefined
@@ -11,18 +17,26 @@ const loginModalContext = createContext<LoginModalContext | undefined>(
 
 type Props = React.PropsWithChildren;
 export const LoginModalContextProvider: React.FC<Props> = ({ children }) => {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [{ isLoginModalOpen, callbackUrlAfterLogin }, setLoginModalState] =
+    useState<LoginModalState>({
+      isLoginModalOpen: false,
+    });
 
   const closeLoginModal = () => {
-    setIsLoginModalOpen(false);
+    setLoginModalState((s) => ({ ...s, isLoginModalOpen: false }));
   };
-  const openLoginModal = () => {
-    setIsLoginModalOpen(true);
+  const openLoginModal: LoginModalContext["openLoginModal"] = (value) => {
+    setLoginModalState((s) => ({ ...s, ...value, isLoginModalOpen: true }));
   };
 
   return (
     <loginModalContext.Provider
-      value={{ isLoginModalOpen, openLoginModal, closeLoginModal }}
+      value={{
+        isLoginModalOpen,
+        callbackUrlAfterLogin,
+        openLoginModal,
+        closeLoginModal,
+      }}
     >
       {children}
     </loginModalContext.Provider>
@@ -34,5 +48,6 @@ export const useLoginModal = () => {
   if (!context) {
     throw new Error("LoginModalContextProviderが必要です");
   }
+
   return context;
 };

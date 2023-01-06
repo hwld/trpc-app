@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Group, Modal } from "@mantine/core";
+import { Box, Button, Flex, Modal, Stack, Text } from "@mantine/core";
 import { signIn } from "next-auth/react";
 import { ReactNode } from "react";
 import { FaGithub } from "react-icons/fa";
@@ -11,10 +11,11 @@ import { UserCard } from "./UserCard";
 type Props = { children: ReactNode };
 export const AppLayout: React.FC<Props> = ({ children }) => {
   const { session } = useSessionQuery();
-  const { isLoginModalOpen, closeLoginModal } = useLoginModal();
+  const { isLoginModalOpen, callbackUrlAfterLogin, closeLoginModal } =
+    useLoginModal();
 
   const handleLogin = () => {
-    signIn("github");
+    signIn("github", { callbackUrl: callbackUrlAfterLogin });
   };
 
   return (
@@ -38,17 +39,21 @@ export const AppLayout: React.FC<Props> = ({ children }) => {
         </Flex>
         <Box>{children}</Box>
         <Modal
+          centered
           opened={isLoginModalOpen}
           onClose={closeLoginModal}
           title="ログイン"
           overlayOpacity={0.5}
           styles={{ title: { fontWeight: "bold", fontSize: "21px" } }}
         >
-          <Group>
+          <Stack>
+            <Text>
+              この機能を利用するためには、ログインをする必要があります。
+            </Text>
             <Button leftIcon={<FaGithub size="21" />} onClick={handleLogin}>
               Githubでログイン
             </Button>
-          </Group>
+          </Stack>
         </Modal>
       </Box>
     </Flex>

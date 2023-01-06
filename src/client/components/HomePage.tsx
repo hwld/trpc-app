@@ -49,7 +49,7 @@ export const HomePage: React.FC = () => {
   const handleClickGoThemeCreate = (e: SyntheticEvent) => {
     if (!session) {
       e.preventDefault();
-      openLoginModal();
+      openLoginModal({ callbackUrlAfterLogin: "/themes/create" });
     }
   };
 
