@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { db } from "../prisma";
+import { db } from "../lib/prisma";
 import { middleware } from "./idnex";
 
 export const isLoggedIn = middleware(async ({ ctx, next }) => {

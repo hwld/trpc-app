@@ -2,13 +2,13 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { SortOrder } from "../lib/dbUtil";
 import { paginate } from "../lib/paginate";
+import { db } from "../lib/prisma";
 import {
   findTheme,
   findThemes,
   searchThemeIds,
   themesWithPagingSchema,
 } from "../models/theme";
-import { db } from "../prisma";
 import { router } from "../trpc/idnex";
 import { publicProcedure, requireLoggedInProcedure } from "../trpc/procedures";
 

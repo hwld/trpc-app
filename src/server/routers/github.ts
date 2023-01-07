@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { db } from "../prisma";
+import { db } from "../lib/prisma";
 import { router } from "../trpc/idnex";
 import { requireLoggedInProcedure } from "../trpc/procedures";
 

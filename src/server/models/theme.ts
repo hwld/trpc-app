@@ -1,7 +1,7 @@
 import { OmitStrict } from "@/share/types/OmitStrict";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { db } from "../prisma";
+import { db } from "../lib/prisma";
 
 export const themeSchema = z.object({
   id: z.string(),
