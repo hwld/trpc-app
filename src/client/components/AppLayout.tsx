@@ -1,22 +1,15 @@
-import { Box, Button, Flex, Modal, Stack, Text } from "@mantine/core";
+import { Box, Button, Flex } from "@mantine/core";
 import { signIn } from "next-auth/react";
 import { ReactNode } from "react";
-import { FaGithub } from "react-icons/fa";
 import { MdLogin } from "react-icons/md";
-import { useLoginModal } from "../contexts/useLoginModalContext";
 import { useSessionQuery } from "../hooks/useSessionQuery";
+import { LoginModal } from "./LoginModal";
 import { SideMenu } from "./SideMenu";
 import { UserCard } from "./UserCard";
 
 type Props = { children: ReactNode };
 export const AppLayout: React.FC<Props> = ({ children }) => {
   const { session } = useSessionQuery();
-  const { isLoginModalOpen, callbackUrlAfterLogin, closeLoginModal } =
-    useLoginModal();
-
-  const handleLogin = () => {
-    signIn("github", { callbackUrl: callbackUrlAfterLogin });
-  };
 
   return (
     <Flex mih="100vh" gap={40} p="md" bg="gray.2">
@@ -38,23 +31,7 @@ export const AppLayout: React.FC<Props> = ({ children }) => {
           )}
         </Flex>
         <Box>{children}</Box>
-        <Modal
-          centered
-          opened={isLoginModalOpen}
-          onClose={closeLoginModal}
-          title="ログイン"
-          overlayOpacity={0.5}
-          styles={{ title: { fontWeight: "bold", fontSize: "21px" } }}
-        >
-          <Stack>
-            <Text>
-              この機能を利用するためには、ログインをする必要があります。
-            </Text>
-            <Button leftIcon={<FaGithub size="21" />} onClick={handleLogin}>
-              Githubでログイン
-            </Button>
-          </Stack>
-        </Modal>
+        <LoginModal />
       </Box>
     </Flex>
   );

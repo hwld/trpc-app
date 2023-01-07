@@ -23,10 +23,10 @@ export const LoginModalContextProvider: React.FC<Props> = ({ children }) => {
     });
 
   const closeLoginModal = () => {
-    setLoginModalState((s) => ({ ...s, isLoginModalOpen: false }));
+    setLoginModalState({ isLoginModalOpen: false });
   };
   const openLoginModal: LoginModalContext["openLoginModal"] = (value) => {
-    setLoginModalState((s) => ({ ...s, ...value, isLoginModalOpen: true }));
+    setLoginModalState({ ...value, isLoginModalOpen: true });
   };
 
   return (

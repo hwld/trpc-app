@@ -14,6 +14,8 @@ import { showNotification } from "@mantine/notifications";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
+import { useLoginModal } from "../contexts/useLoginModalContext";
+import { useSessionQuery } from "../hooks/useSessionQuery";
 import {
   themeDetailQueryKey,
   useThemeDetailQuery,
@@ -26,6 +28,8 @@ export const ThemeDetailPage = () => {
 
   const queryClient = useQueryClient();
   const { theme } = useThemeDetailQuery(themeId);
+  const { session } = useSessionQuery();
+  const { openLoginModal } = useLoginModal();
 
   const { data: liked } = useQuery(["themes", "page", themeId, "liked"], () => {
     return trpc.themes.liked.query({ themeId });
@@ -49,6 +53,10 @@ export const ThemeDetailPage = () => {
   });
 
   const handleLike = () => {
+    if (!session) {
+      openLoginModal();
+      return;
+    }
     likeMutation.mutate({ themeId, like: !liked });
   };
 
@@ -78,6 +86,10 @@ export const ThemeDetailPage = () => {
 
   const handleJoin = () => {
     if (!theme) {
+      return;
+    }
+    if (!session) {
+      openLoginModal();
       return;
     }
     joinMutation.mutate({ themeId: theme.id });
