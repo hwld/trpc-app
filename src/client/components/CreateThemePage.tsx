@@ -3,6 +3,7 @@ import { showNotification } from "@mantine/notifications";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { Route } from "../consts/route";
 import { useAllTagsQuery } from "../hooks/useAllTagsQuery";
 import { RouterInput, trpc } from "../trpc";
 
@@ -32,7 +33,7 @@ export const ThemeCreatePage: React.FC = () => {
         title: "投稿",
         message: "投稿しました。",
       });
-      router.push("/");
+      router.push(Route.home);
     },
   });
 

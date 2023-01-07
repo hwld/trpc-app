@@ -10,6 +10,7 @@ import {
   Title,
   UnstyledButton,
 } from "@mantine/core";
+import { Route } from "../consts/route";
 import { useAllTagsQuery } from "../hooks/useAllTagsQuery";
 import { useSearchedThemesQuery } from "../hooks/useSearchedThemesQuery";
 import { useStateAndUrlParamString } from "../hooks/useStateAndUrlParamString";
@@ -76,7 +77,7 @@ export const ThemeSearchPage: React.FC = () => {
             <UnstyledButton
               key={theme.id}
               component={Link}
-              href={`/themes/${theme.id}`}
+              href={Route.themeDetail(theme.id)}
             >
               <Card p="md" radius="md" withBorder>
                 <Title order={3}>{theme.title}</Title>

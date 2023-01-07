@@ -6,6 +6,7 @@ import { BiMedal } from "react-icons/bi";
 import { FaReact } from "react-icons/fa";
 import { IoSearchSharp } from "react-icons/io5";
 import { MdOutlineHome, MdOutlinePostAdd } from "react-icons/md";
+import { Route } from "../consts/route";
 import { SideMenuLink } from "./SideMenuAction";
 
 type Props = { loggedInUser: Session["user"] | undefined };
@@ -49,25 +50,21 @@ export const SideMenu: React.FC<Props> = ({ loggedInUser }) => {
           <SideMenuLink
             icon={MdOutlineHome}
             label="ホーム"
-            href="/"
-            active={router.pathname === "/"}
+            href={Route.home}
+            active={router.pathname === Route.home}
           />
           <SideMenuLink
             icon={IoSearchSharp}
             label="検索"
-            href="/themes/search"
-            active={router.pathname === "/themes/search"}
+            href={Route.searchTheme}
+            active={router.pathname === Route.searchTheme}
           />
-          <SideMenuLink
-            icon={BiMedal}
-            label="ランキング"
-            href="/themes/ranking"
-          />
+          <SideMenuLink icon={BiMedal} label="ランキング" href={Route.home} />
           <SideMenuLink
             icon={MdOutlinePostAdd}
             label="投稿"
-            href="/themes/create"
-            active={router.pathname === "/themes/create"}
+            href={Route.createTheme}
+            active={router.pathname === Route.createTheme}
           />
         </Flex>
       </Flex>

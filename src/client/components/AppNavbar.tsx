@@ -2,6 +2,7 @@ import { Avatar, Button, Navbar, Stack, Text } from "@mantine/core";
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
 import Link from "next/link";
+import { Route } from "../consts/route";
 
 type Props = { user?: Session["user"] | undefined };
 export const AppNavbar: React.FC<Props> = ({ user }) => {
@@ -16,8 +17,7 @@ export const AppNavbar: React.FC<Props> = ({ user }) => {
               <Button onClick={() => signOut()} color="red">
                 ログアウト
               </Button>
-
-              <Button component={Link} href="/users/me">
+              <Button component={Link} href={Route.me}>
                 プロフィールを編集する
               </Button>
 
@@ -25,7 +25,7 @@ export const AppNavbar: React.FC<Props> = ({ user }) => {
                 variant="outline"
                 color="red"
                 component={Link}
-                href="/users/delete"
+                href={Route.deleteUser}
               >
                 ユーザーを削除する
               </Button>

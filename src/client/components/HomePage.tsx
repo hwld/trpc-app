@@ -13,6 +13,7 @@ import { showNotification } from "@mantine/notifications";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { SyntheticEvent, useState } from "react";
+import { Route } from "../consts/route";
 import { useLoginModal } from "../contexts/useLoginModalContext";
 import { usePagingThemesQuery } from "../hooks/usePagingThemesQuery";
 import { useSessionQuery } from "../hooks/useSessionQuery";
@@ -60,15 +61,15 @@ export const HomePage: React.FC = () => {
       </Title>
       <Button
         component={Link}
-        href="/themes/create"
+        href={Route.createTheme}
         onClick={handleClickGoThemeCreate}
       >
         お題を投稿する
       </Button>
-      <Button ml="md" component={Link} href="/themes/search">
+      <Button ml="md" component={Link} href={Route.searchTheme}>
         お題を検索する
       </Button>
-      <Button ml="md" component={Link} href="/createRepository">
+      <Button ml="md" component={Link} href={Route.createRepository}>
         リポジトリを作成する
       </Button>
 
@@ -91,7 +92,7 @@ export const HomePage: React.FC = () => {
                 })}
               </Flex>
               <Flex gap={10} mt={10}>
-                <Button component={Link} href={`themes/${theme.id}`}>
+                <Button component={Link} href={Route.themeDetail(theme.id)}>
                   詳細
                 </Button>
                 <Button
